@@ -1,123 +1,161 @@
 import sqlite3
 
-# Подключение к базе
-db = sqlite3.connect('university.db')
-sql = db.cursor()
+class Student:
+    def __init__(self, name, surname, patronymic, group, grades):
+        self.name = name
+        self.surname = surname
+        self.patronymic = patronymic
+        self.group = group
+        if len(grades) != 4:
+            raise ValueError("Успеваемость должна содержать 4 оценки.")
+        self.grades = grades
 
-# Создаем табличку если ее нет
-sql.execute('''CREATE TABLE IF NOT EXISTS students 
-               (id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT,
-                last_name TEXT,
-                group_num TEXT,
-                mark1 INTEGER,
-                mark2 INTEGER,
-                mark3 INTEGER,
-                mark4 INTEGER)''')
-db.commit()
+def display():
+    cursor.execute("SELECT * FROM Student")
+    all_rows = cursor.fetchall()
 
-
-def add():
-    print("\nДобавляем студента")
-    n = input("Имя: ")
-    ln = input("Фамилия: ")
-    gr = input("Группа: ")
-    print("4 оценки через пробел:")
-    m1, m2, m3, m4 = map(int, input().split())
-
-    sql.execute("INSERT INTO students (name, last_name, group_num, mark1, mark2, mark3, mark4) VALUES (?,?,?,?,?,?,?)",
-                (n, ln, gr, m1, m2, m3, m4))
-    db.commit()
-    print("Готово!")
-
-
-def show_all():
     print("\nВсе студенты:")
-    sql.execute("SELECT id, name, last_name, group_num FROM students")
-    for student in sql.fetchall():
-        print(f"{student[0]}. {student[1]} {student[2]} из {student[3]}")
+    for row in all_rows:
+        print(f"ID: {row[0]}, Имя: {row[1]}, Фамилия: {row[2]}, Отчество: {row[3]}, "
+              f"Группа: {row[4]}, Средний балл: {row[5]:.2f}")
+    print()
 
+def input_student(return_as=False):  # Переименовано из input
+    print("Введите данные студента:")
+    name = input("Имя: ")
+    surname = input("Фамилия: ")
+    patronymic = input("Отчество: ")
+    group = input("Группа: ")
 
-def show_one():
-    num = input("\nНомер студента: ")
-    sql.execute("SELECT name, last_name, group_num, mark1, mark2, mark3, mark4 FROM students WHERE id=?", (num,))
-    res = sql.fetchone()
-
-    if res:
-        avg = (res[3] + res[4] + res[5] + res[6]) / 4
-        print(f"\n{res[0]} {res[1]}")
-        print(f"Группа: {res[2]}")
-        print(f"Оценки: {res[3]}, {res[4]}, {res[5]}, {res[6]}")
-        print(f"Средний: {avg:.1f}")
-    else:
-        print("Нет такого!")
-
-
-def change():
-    num = input("\nНомер студента для изменения: ")
-    print("Новые данные (если не меняем - просто Enter):")
-
-    n = input("Имя: ")
-    ln = input("Фамилия: ")
-    gr = input("Группа: ")
-    marks = input("4 оценки через пробел: ")
-
-    if n:
-        sql.execute("UPDATE students SET name=? WHERE id=?", (n, num))
-    if ln:
-        sql.execute("UPDATE students SET last_name=? WHERE id=?", (ln, num))
-    if gr:
-        sql.execute("UPDATE students SET group_num=? WHERE id=?", (gr, num))
-    if marks:
-        m1, m2, m3, m4 = map(int, marks.split())
-        sql.execute("UPDATE students SET mark1=?, mark2=?, mark3=?, mark4=? WHERE id=?",
-                    (m1, m2, m3, m4, num))
-
-    db.commit()
-    print("Изменено!")
-
-
-def delete():
-    num = input("\nНомер студента для удаления: ")
-    sql.execute("DELETE FROM students WHERE id=?", (num,))
-    db.commit()
-    print("Удалено!")
-
-
-def group_avg():
-    gr = input("\nГруппа: ")
-    sql.execute("SELECT AVG((mark1+mark2+mark3+mark4)/4.0) FROM students WHERE group_num=?", (gr,))
-    res = sql.fetchone()[0]
-    print(f"Средний балл: {res:.1f}" if res else "Нет такой группы")
-
-
-# Главное меню
-while True:
-    print("\n1 - Добавить")
-    print("2 - Все студенты")
-    print("3 - Найти по номеру")
-    print("4 - Изменить")
-    print("5 - Удалить")
-    print("6 - Средний группы")
-    print("0 - Выход")
-
-    c = input("Выберите: ")
-
-    if c == "1":
-        add()
-    elif c == "2":
-        show_all()
-    elif c == "3":
-        show_one()
-    elif c == "4":
-        change()
-    elif c == "5":
-        delete()
-    elif c == "6":
-        group_avg()
-    elif c == "0":
-        db.close()
-        print("Пока!")
+    while True:
+        grades_input = input("4 оценки (через пробел): ").split()
+        grades = [int(grade) for grade in grades_input]
+        if len(grades) != 4:
+            print("Нужно ввести ровно 4 оценки!")
+            continue
+        if not all(1 <= grade <= 5 for grade in grades):
+            print("Оценки должны быть от 1 до 5!")
+            continue
         break
+
+    if return_as:
+        return [name, surname, patronymic, group, grades]
+    return Student(name, surname, patronymic, group, grades)
+
+def add(student):
+    average = sum(student.grades) / len(student.grades)
+    cursor.execute("""
+        INSERT INTO Student 
+        (name, surname, patronymic, groups, average_score)
+        VALUES (?, ?, ?, ?, ?)
+        """, (
+        student.name,
+        student.surname,
+        student.patronymic,
+        student.group,
+        average
+    ))
+    connect.commit()
+
+# Подключение к базе данных
+connect = sqlite3.connect("Student.db")
+cursor = connect.cursor()
+
+# Создание таблицы
+cursor.execute("""CREATE TABLE IF NOT EXISTS Student
+                (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT,
+                surname TEXT,
+                patronymic TEXT,
+                groups TEXT,
+                average_score REAL)
+                """)
+connect.commit()
+# Основной цикл программы
+while True:
+    print("\n1 - Добавить нового студента\n"
+          "2 - Просмотр всех студентов\n"
+          "3 - Просмотр одного студента\n"
+          "4 - Редактирование студента\n"
+          "5 - Удаление студента\n"
+          "6 - Средний балл студентов группы\n"
+          "7 - Завершить программу")
+    action = int(input("Выберите действие: "))
+
+
+    if action == 1:
+        student = input_student()
+        add(student)
+        print("Студент успешно добавлен")
+
+    elif action == 2:
+        display()
+
+    elif action == 3:
+        id_student = int(input("Введите ID студента для вывода: "))
+        cursor.execute("SELECT * FROM Student WHERE id = ?", (id_student,))
+        row = cursor.fetchone()
+        if row:
+            print(f"\nИмя: {row[1]}, Фамилия: {row[2]}, Отчество: {row[3]}, "
+                    f"Группа: {row[4]}, Средний балл: {row[5]:.2f}\n")
+        else:
+            print("Студент не найден")
+
+    elif action == 4:
+        display()
+        id_student = input("Выберите ID студента для редактирования: ")
+        # Проверка существования студента
+        cursor.execute("SELECT id FROM Student WHERE id = ?", (id_student,))
+        if not cursor.fetchone():
+            print("Студент не найден")
+            continue
+        student_info = input_student(return_as=True)  # Исправлено
+        average = sum(student_info[4]) / len(student_info[4])
+        cursor.execute("""
+            UPDATE Student SET 
+            name = ?, 
+            surname = ?, 
+            patronymic = ?, 
+            groups = ?, 
+            average_score = ? 
+            WHERE id = ?
+            """, (
+            student_info[0],
+            student_info[1],
+            student_info[2],
+            student_info[3],
+            average,
+            id_student
+        ))
+        connect.commit()
+        print("Данные обновлены")
+
+    elif action == 5:
+        display()
+        id_student = input("Выберите ID студента для удаления: ")
+        cursor.execute("DELETE FROM Student WHERE id = ?", (id_student,))
+        if cursor.rowcount > 0:
+            print("Студент удалён!")
+        else:
+            print("Студент не найден.")
+        connect.commit()
+
+    elif action == 6:
+        group_number = input("Введите группу для вывода среднего балла: ")
+        cursor.execute("SELECT average_score FROM Student WHERE groups = ?", (group_number,))
+        rows = cursor.fetchall()
+        if not rows:
+            print("В этой группе нет студентов")
+            continue
+
+        total = sum(row[0] for row in rows)
+        average = total / len(rows)
+        print(f"Средний балл группы {group_number}: {average:.2f}")
+
+    elif action == 7:
+        break
+
     else:
-        print("Не понял...")
+        print("Неизвестное действие. Введите число от 1 до 7")
+
+connect.close()
