@@ -10,15 +10,15 @@ class Counter:
 
     @property
     def value(self):
-        return self._value  # Текущее значение счетчика
+        return self._value
 
     def __str__(self):
-        return str(self._value)  # Для удобного отображения значения счетчика
+        return str(self._value)
 
 
 c1 = Counter()
 print(f"Начальное значение: {c1}")
 max_counter = c1 + 1
-print(f"После увелечения на 1: {max_counter}")  # Счетчик увеличен на 1
+print(f"После увелечения на 1: {max_counter}")
 min_counter = c1 - 1
-print(f"После уменьшения на 1: {min_counter}")  # Счетчик уменьшен на 1
+print(f"После уменьшения на 1: {min_counter}")

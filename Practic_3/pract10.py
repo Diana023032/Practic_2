@@ -2,9 +2,8 @@ class Worker:
     def __init__(self, name, surname, rate, days):
         self.__name = name
         self.__surname = surname
-        self.__rate = float(rate)  # Преобразуем ставку в число
-        self.__days = int(days)  # Преобразуем количество дней в число
-
+        self.__rate = float(rate)
+        self.__days = int(days)
     def get_name(self):
         return self.__name
 
@@ -16,7 +15,7 @@ class Worker:
 
     def get_days(self):
         return self.__days
-    def GetSalary(self):  # Исправлено имя метода
+    def GetSalary(self):
         salary = self.get_rate() * self.get_days()
         return salary
 

@@ -20,7 +20,7 @@ def display():
               f"Группа: {row[4]}, Средний балл: {row[5]:.2f}")
     print()
 
-def input_student(return_as=False):  # Переименовано из input
+def input_student(return_as=False):
     print("Введите данные студента:")
     name = input("Имя: ")
     surname = input("Фамилия: ")
@@ -57,11 +57,9 @@ def add(student):
     ))
     connect.commit()
 
-# Подключение к базе данных
 connect = sqlite3.connect("Student.db")
 cursor = connect.cursor()
 
-# Создание таблицы
 cursor.execute("""CREATE TABLE IF NOT EXISTS Student
                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT,
@@ -71,7 +69,6 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS Student
                 average_score REAL)
                 """)
 connect.commit()
-# Основной цикл программы
 while True:
     print("\n1 - Добавить нового студента\n"
           "2 - Просмотр всех студентов\n"
@@ -104,7 +101,6 @@ while True:
     elif action == 4:
         display()
         id_student = input("Выберите ID студента для редактирования: ")
-        # Проверка существования студента
         cursor.execute("SELECT id FROM Student WHERE id = ?", (id_student,))
         if not cursor.fetchone():
             print("Студент не найден")

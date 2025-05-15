@@ -237,8 +237,7 @@ class I_Love_Drink:
 
 if __name__ == "__main__":
     print("Приложение 'I Love Drink'\n")
-    bar = I_Love_Drink()  # Создаем экземпляр класса
-
+    bar = I_Love_Drink()
     while True:
         print("1 - Добавить ингредиент\n"
               "2 - Добавить коктейль\n"
@@ -301,8 +300,6 @@ if __name__ == "__main__":
             case 5:
                 name_sell = input("Введите название напитка для продажи: ").lower()
                 volume_sell = float(input("Введите объём продажи: "))
-                # Нужно добавить соответствующий метод в класс I_Love_Drink
-                # Например: bar.sell_drink(name_sell, volume_sell)
 
             case 6:
                 stocks = input("Какие запасы необходимо пополнить (1 - Ингредиенты, 2 - Напитки): ")
