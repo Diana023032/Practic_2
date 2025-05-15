@@ -66,18 +66,15 @@ class I_Love_Drink:
                     return
         strength = total_alcohol / total_volume if total_volume > 0 else 0
         try:
-            # Сначала добавляем коктейль в таблицу Cocktails
             cursor.execute("INSERT INTO Cocktails (name, strength, price) VALUES (?, ?, ?)",
                            (name, strength, price))
-            cocktail_id = cursor.lastrowid  # Получаем ID только что добавленного коктейля
-
-            # Затем добавляем компоненты
+            cocktail_id = cursor.lastrowid
             for component in components:
                 cursor.execute("""INSERT INTO Cocktail_Components 
                                (cocktail_id, component_type, component_name, quantity)
                                VALUES (?, ?, ?, ?)""",
                                (cocktail_id, component['type'], component['name'], component['quantity']))
-            self.con.commit()  # Не забываем подтверждать изменения
+            self.con.commit()
             print("Коктейль успешно добавлен!")
         except sqlite3.IntegrityError:
             print("Коктейль с таким именем уже существует!")
@@ -145,10 +142,10 @@ class I_Love_Drink:
                 elif type_ == 'Ingredient':
                     cursor.execute("UPDATE Ingredients SET quantity = quantity - ? WHERE name = ?",
                                    (quantity, name_))
-            self.con.commit()  # Добавлено
+            self.con.commit()
             print("Продажа завершена.")
         except:
-            self.con.rollback()  # Откатываем изменения при ошибке
+            self.con.rollback()
             print("Ошибка при продаже.")
 
     def show_cocktails(self):
